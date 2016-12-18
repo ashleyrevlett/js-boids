@@ -7,20 +7,29 @@
 		body {
 			margin: 0;
 			padding: 0;
+			background-color: #999;
+		}
+		#myCanvas {
 			background-color: #ccc;
+		}
+		.container {
+			margin: 50px auto;
+			width: 600px;
 		}
 	</style>
 
 </head>
 <body>
-	<h1>test</h1>
-
-	<canvas id="myCanvas" width="480" height="320"></canvas>
-
+	<div class="container">
+		<canvas id="myCanvas" width="600" height="480"></canvas>
+	</div>
 </body>
 
-<script src="lib/main.js"></script>
-
+<script src="vendor/system.js"></script>
+<script>
+    System.config({ "baseURL": "lib" }); // babel export folder
+    System.import("main.js"); // app entry point
+ </script>
 
 
 </html>
