@@ -1,0 +1,17 @@
+{
+  "name": "pixi-boid",
+  "version": "0.0.1",
+  "main": "main.js",
+  "license": "MIT",
+  "dependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-preset-env": "^1.1.4",
+    "matter-js": "^0.11.1",
+    "pixi.js": "^4.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "build": "./node_modules/.bin/babel src -d lib; python -m SimpleHTTPServer 8000",
+    "serve": "python -m SimpleHTTPServer 8000"
+  }
+}
