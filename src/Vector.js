@@ -28,5 +28,10 @@ export default class Vector {
         let newY = vector1.y * scalar;
         return new Vector(newX, newY);
     }
+    static distance(vector1, vector2) {
+        let xd = Math.pow(vector2.x - vector1.x, 2);
+        let yd = Math.pow(vector2.y - vector1.y, 2);
+        return Math.sqrt(Math.abs(xd + yd));
+    }
 }
 

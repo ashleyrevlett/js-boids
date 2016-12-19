@@ -30,6 +30,7 @@ export default class Flock {
 		this.ctx.clearRect(0, 0, this.canvas_width, this.canvas_height);
 		this.center_point = this.calculateCenter();
 		this.drawCenter(this.center_point.x, this.center_point.y);
+		this.moveBoids();
 		for (let i = 0; i < this.totalBoids; i++) {
 			this.flock[i].update(this.center_point);
 		}
@@ -52,17 +53,50 @@ export default class Flock {
 		this.ctx.fill();
 		this.ctx.closePath();
 	}
-	// moveBoids() {
-	// 	for (let i = 0; i < this.totalBoids; i++) {
-	// 		for (let j = 0; i < this.totalBoids; j++) {
-	// 			if (j != i) {
-	// 			// 	IF |b.position - bJ.position| < 100 THEN
-	// 			// 		c = c - (b.position - bJ.position)
-	// 			//  END IF
+	moveBoids() {
+		for (let i = 0; i < this.totalBoids; i++) {
+			let currentPos = new Vector(this.flock[i].x, this.flock[i].y);
+			let centerOfMass = this.calculateCenter();
+			let newPos = this.rule1(currentPos, centerOfMass);
+			newPos = this.rule2(newPos, i);
+			console.log(currentPos);
+			console.log(newPos);
+			this.flock[i].x = newPos.x;
+			this.flock[i].y = newPos.y;
+		}
+	}
+	rule1(currentPos, center) {
+		console.log("passed to rule1");
+		console.log(currentPos);
+		console.log(center);
+		// @return new pos vector
+		// move toward center of mass of all boids
+		let moveDir = Vector.subtract(center, currentPos);
+		moveDir = Vector.normalize(moveDir);
+		moveDir = Vector.multiply(moveDir, this.speed);
+		let newPos = Vector.add(currentPos, moveDir);
+		return newPos;
+	}
+	rule2(currentPos, boidIndex) {
+		// @return new position vector
+		// avoid getting too close to other boids
+		let boid = this.flock[boidIndex];
+		for (let i = 0; i < this.totalBoids; i++) {
+			let neighbor = this.flock[i];
+			if (neighbor.x != boid.x && neighbor.y != boid.y) {
+				let neighborPos = new Vector(neighbor.x, neighbor.y);
+				let distance = Vector.distance(currentPos, neighborPos);
+				if (distance < this.radius * 2.5) {
+					// push back against the overlapping direction
+					let moveDir = Vector.subtract(currentPos, neighborPos);
+					moveDir = Vector.normalize(moveDir);
+					moveDir = Vector.multiply(moveDir, this.speed);
+					let newPos = Vector.add(currentPos, moveDir);
+					currentPos = newPos;
+				}
+			}
+		}
+		return currentPos;
+	}
 
-	// 				// this.flock[i]
-	// 			}
-	// 		}
-	// 	}
-	// }
 }
