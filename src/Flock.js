@@ -19,9 +19,9 @@ export default class Flock {
 	createFlock(flock) {
 		let boids = [];
 		for (let i = 0; i < this.totalBoids; i++) {
-			const randomX = Math.floor((Math.random() * this.canvas_width) + 1);
-			const randomY = Math.floor((Math.random() * this.canvas_height) + 1);
-			let b = new Boid(this.ctx, randomX, randomY, this.radius);
+			let randomX = Math.floor((Math.random() * this.canvas_width) + 1);
+			let randomY = Math.floor((Math.random() * this.canvas_height) + 1);
+			let b = new Boid(this.ctx, randomX, randomY, this.radius, this.speed);
 			boids.push(b);
 		}
 		return boids;
@@ -52,4 +52,17 @@ export default class Flock {
 		this.ctx.fill();
 		this.ctx.closePath();
 	}
+	// moveBoids() {
+	// 	for (let i = 0; i < this.totalBoids; i++) {
+	// 		for (let j = 0; i < this.totalBoids; j++) {
+	// 			if (j != i) {
+	// 			// 	IF |b.position - bJ.position| < 100 THEN
+	// 			// 		c = c - (b.position - bJ.position)
+	// 			//  END IF
+
+	// 				// this.flock[i]
+	// 			}
+	// 		}
+	// 	}
+	// }
 }

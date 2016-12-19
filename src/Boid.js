@@ -1,11 +1,13 @@
 import Vector from 'Vector.js';
 
 export default class {
-	constructor(context, xpos, ypos, radius) {
+	constructor(context, x, y, radius, moveSpeed) {
 		this.context = context;
-		this.x = xpos;
-		this.y = ypos;
+		this.x = x;
+		this.y = y;
+		this.velocity = new Vector(0, 0);
 		this.radius = radius;
+		this.moveSpeed = moveSpeed;
 	}
 	update(center) {
 		this.move(center);
@@ -19,26 +21,28 @@ export default class {
 		this.context.closePath();
 	}
 	move(center) {
-		let newPos = this.rule1(center);
+		// generate moveDir based on 3 boid flocking rules
+		const currentPos = new Vector(this.x, this.y);
+		this.velocity = this.rule1(currentPos, center);
+		// this.velocity = this.rule2(currentPos, center);
+
+		// update to new position
+		const newPos = Vector.add(currentPos, this.velocity);
 		this.x = newPos.x;
 		this.y = newPos.y;
 	}
-	rule1(center) {
-		// move 1% toward center point
+	rule1(currentPos, center) {
 		// get vector from current position toward center point
-		let currentPos = new Vector(this.x, this.y);
 		let moveDir = Vector.subtract(center, currentPos);
 		moveDir = Vector.normalize(moveDir);
-		let newPos = Vector.add(currentPos, moveDir);
-
-		// debug draw
-		// this.context.beginPath();
-		// this.context.lineWidth="5";
-		// this.context.strokeStyle="#009000"; // Green path
-		// this.context.moveTo(currentPos.x,currentPos.y);
-		// this.context.lineTo(newPos.x,newPos.y);
-		// this.context.stroke(); // Draw it
-
-		return newPos;
+		moveDir = Vector.multiply(moveDir, this.moveSpeed);
+		return moveDir;
 	}
+	// rule2(currentPos, center) {
+	// 	// avoid other boids
+	// 	let moveDir = Vector.subtract(center, currentPos);
+	// 	moveDir = Vector.normalize(moveDir);
+	// 	moveDir = Vector.multiply(moveDir, this.moveSpeed);
+	// 	return moveDir;
+	// }
 }

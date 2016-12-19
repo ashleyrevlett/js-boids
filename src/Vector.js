@@ -23,5 +23,10 @@ export default class Vector {
         let newY = vector1.y - vector2.y;
         return new Vector(newX, newY);
     }
+    static multiply(vector1, scalar) {
+        let newX = vector1.x * scalar;
+        let newY = vector1.y * scalar;
+        return new Vector(newX, newY);
+    }
 }
 
