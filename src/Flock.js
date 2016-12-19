@@ -57,38 +57,36 @@ export default class Flock {
 		for (let i = 0; i < this.totalBoids; i++) {
 			let currentPos = new Vector(this.flock[i].x, this.flock[i].y);
 			let centerOfMass = this.calculateCenter();
-			let newPos = this.rule1(currentPos, centerOfMass);
-			newPos = this.rule2(newPos, i);
-			console.log(currentPos);
-			console.log(newPos);
-			this.flock[i].x = newPos.x;
-			this.flock[i].y = newPos.y;
+			let moveDir = this.rule1(currentPos, centerOfMass);
+			currentPos = Vector.add(currentPos, moveDir);
+			moveDir = this.rule2(currentPos, i);
+			currentPos = Vector.add(currentPos, moveDir);
+			this.flock[i].x = currentPos.x;
+			this.flock[i].y = currentPos.y;
 		}
 	}
 	rule1(currentPos, center) {
-		console.log("passed to rule1");
-		console.log(currentPos);
-		console.log(center);
 		// @return new pos vector
 		// move toward center of mass of all boids
 		let moveDir = Vector.subtract(center, currentPos);
 		moveDir = Vector.normalize(moveDir);
 		moveDir = Vector.multiply(moveDir, this.speed);
-		let newPos = Vector.add(currentPos, moveDir);
-		return newPos;
+		return moveDir;
 	}
 	rule2(currentPos, boidIndex) {
 		// @return new position vector
 		// avoid getting too close to other boids
+		let moveDir = new Vector(0, 0);
 		let boid = this.flock[boidIndex];
 		for (let i = 0; i < this.totalBoids; i++) {
 			let neighbor = this.flock[i];
 			if (neighbor.x != boid.x && neighbor.y != boid.y) {
 				let neighborPos = new Vector(neighbor.x, neighbor.y);
 				let distance = Vector.distance(currentPos, neighborPos);
-				if (distance < this.radius * 2.5) {
+				console.log(distance);
+				if (distance < this.radius * 5) {
 					// push back against the overlapping direction
-					let moveDir = Vector.subtract(currentPos, neighborPos);
+					moveDir = Vector.subtract(currentPos, neighborPos);
 					moveDir = Vector.normalize(moveDir);
 					moveDir = Vector.multiply(moveDir, this.speed);
 					let newPos = Vector.add(currentPos, moveDir);
@@ -96,7 +94,7 @@ export default class Flock {
 				}
 			}
 		}
-		return currentPos;
+		return moveDir;
 	}
 
 }

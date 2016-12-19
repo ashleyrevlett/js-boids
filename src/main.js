@@ -1,4 +1,4 @@
 import Flock from 'Flock.js';
 
 // canvasID, totalBoids, boidRadius, boidSpeed
-new Flock('myCanvas', 5, 7, 2);
+new Flock('myCanvas', 10, 8, 3);
