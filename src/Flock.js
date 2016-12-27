@@ -96,23 +96,21 @@ export default class Flock {
 		let newPos = currentPos.add(moveDir);
 		for (let i = 0; i < this.totalBoids; i++) {
 			let neighbor = this.flock[i];
-			if (neighbor !== boid && boid.circle != undefined && neighbor.circle != undefined) {
-				try {
-					let response = {};
-					let c1 = new SAT.Circle(boid.circle.pos, boid.circle.r);
-					let c2 = new SAT.Circle(neighbor.circle.pos, neighbor.circle.r);
-					let collided = SAT.testCircleCircle(c1, c2, response);
-					if (collided) {
-						moveDir = new SAT.Vector(0, 0);
-					};
-				}
-				catch (e) { // why is this an error?
-				   // console.log(e);
-				   // moveDir = new SAT.Vector(0, 0);
-				};
-
-
-			}
+			// if (neighbor !== boid) {
+			// 	try {
+			// 		let response = {};
+			// 		let c1 = new SAT.Circle(boid.circle.pos, boid.circle.r);
+			// 		let c2 = new SAT.Circle(neighbor.circle.pos, neighbor.circle.r);
+			// 		let collided = SAT.testCircleCircle(c1, c2, response);
+			// 		if (collided) {
+			// 			moveDir = new SAT.Vector(0, 0);
+			// 		};
+			// 	}
+			// 	catch (e) { // why is this an error?
+			// 	   // console.log(e);
+			// 	   // moveDir = new SAT.Vector(0, 0);
+			// 	};
+			// }
 		}
 
 		return moveDir;
