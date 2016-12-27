@@ -13,29 +13,30 @@ import SAT from '../node_modules/sat/SAT.js';
 export default class Boid {
 	constructor(context, x, y, radius, moveSpeed) {
 		this.context = context;
-		this.x = x;
-		this.y = y;
 		this.velocity = new SAT.Vector(0, 0);
-		this.radius = radius;
 		this.moveSpeed = moveSpeed;
+		this.circle = new SAT.Circle(new SAT.Vector(x, y), radius);
 	}
 	update() {
 		this.move();
 		this.draw();
 	}
 	draw() {
+		console.log("Drawing");
+		let x = this.circle.pos.x;
+		let y = this.circle.pos.y;
+		let r = this.circle.r;
 		this.context.beginPath();
-		this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+		this.context.arc(x, y, r, 0, Math.PI * 2);
 		this.context.fillStyle = '#0095DD';
 		this.context.fill();
 		this.context.closePath();
 	}
 	move() {
 		// update to new position
-		let currentPos = new SAT.Vector(this.x, this.y);
+		let currentPos = new SAT.Vector(this.circle.pos.x, this.circle.pos.y);
 		let newPos = currentPos.add(this.velocity);
-		this.x = newPos.x;
-		this.y = newPos.y;
+		this.circle.pos = newPos.clone();
 	}
 	setVelocity(newX, newY) {
 		this.velocity = new SAT.Vector(newX, newY);

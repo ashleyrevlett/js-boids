@@ -38,16 +38,16 @@ export default class Flock {
 		this.center_point = this.calculateCenter();
 		this.drawCenter(this.center_point.x, this.center_point.y);
 		for (let i = 0; i < this.totalBoids; i++) {
-			this.flock[i].update(this.center_point);
+			this.flock[i].update();
 		}
-		this.moveBoids();
+		this.moveBoids(); // move after 1st draw
 	}
 	calculateCenter() {
 		let averageX = 0;
 		let averageY = 0;
 		for (let i = 0; i < this.totalBoids; i++) {
-			averageX += this.flock[i].x;
-			averageY += this.flock[i].y;
+			averageX += this.flock[i].circle.pos.x;
+			averageY += this.flock[i].circle.pos.y;
 		}
 		averageX /= this.totalBoids;
 		averageY /= this.totalBoids;
@@ -64,7 +64,7 @@ export default class Flock {
 		for (let i = 0; i < this.totalBoids; i++) {
 
 			let centerOfMass = this.calculateCenter();
-			let currentPos = new SAT.Vector(this.flock[i].x, this.flock[i].y); // starting pos
+			let currentPos = new SAT.Vector(this.flock[i].circle.pos.x, this.flock[i].circle.pos.y); // starting pos
 
 			// move toward center of mass
 			let v1 = this.rule1(currentPos, centerOfMass);
@@ -77,8 +77,6 @@ export default class Flock {
 
 			// constrain to within bounds of canvas
 			if (vd.len() > 0) {
-				// currentPos = new SAT.Vector(this.flock[i].x, this.flock[i].y); // update after rule2
-				// currentPos = currentPos.add(moveDir); // update after rule1
 				vd = this.boundsCheck(vd, currentPos);
 			}
 
@@ -93,6 +91,7 @@ export default class Flock {
 		let moveDir = center.sub(currentPos);
         moveDir = moveDir.normalize();
 		moveDir = moveDir.scale(this.speed);
+
 		return moveDir;
 	}
 	rule2(boidIndex) {
@@ -105,8 +104,8 @@ export default class Flock {
 		for (let i = 0; i < this.totalBoids; i++) {
 			let neighbor = this.flock[i];
 			if (neighbor !== boid) { // don't collide with self
-				let currentPos = new SAT.Vector(boid.x, boid.y); // may change, have to update each time
-				let neighborPos = new SAT.Vector(neighbor.x, neighbor.y);
+				let currentPos = new SAT.Vector(boid.circle.pos.x, boid.circle.pos.y); // may change, have to update each time
+				let neighborPos = new SAT.Vector(neighbor.circle.pos.x, neighbor.circle.pos.y);
 
 				// get vector from between 2 points
 				let dir = currentPos.sub(neighborPos);
@@ -117,13 +116,12 @@ export default class Flock {
 					moveDir = dir.normalize();
 					moveDir = moveDir.scale(this.speed); // slightly faster than normal
 					// console.log(`Pushing back: (${moveDir.x}, ${moveDir.y})`);
-
-					// i = 0; // recheck !
 				}
 			}
 		}
 		return moveDir;
 	}
+
 	boundsCheck(moveDir, currentPos) {
 		// @return new moveDir vector that's constrained to within canvas bounds
 		let maxX = this.canvas_width + this.radius * 2;
