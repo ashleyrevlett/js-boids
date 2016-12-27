@@ -65,12 +65,13 @@ export default class Flock {
 
 			let centerOfMass = this.calculateCenter();
 			let currentPos = new SAT.Vector(this.flock[i].circle.pos.x, this.flock[i].circle.pos.y); // starting pos
+			let boid = this.flock[i];
 
 			// move toward center of mass
-			let v1 = this.rule1(currentPos, centerOfMass);
+			let v1 = this.rule1(currentPos, centerOfMass, boid);
 
 			// keep minimum distance between selves
-			let v2 = this.rule2(i);
+			let v2 = this.rule2(boid);
 
 			// combine both movedirs
 			let vd = v1.add(v2);
@@ -84,7 +85,7 @@ export default class Flock {
             this.flock[i].setVelocity(vd.x, vd.y);
 		}
 	}
-	rule1(currentPos, center) {
+	rule1(currentPos, center, boid) {
 		// @return new pos vector
 		// move toward center of mass of all boids
 		// if doing so won't cause a collision
@@ -92,12 +93,33 @@ export default class Flock {
         moveDir = moveDir.normalize();
 		moveDir = moveDir.scale(this.speed);
 
+		let newPos = currentPos.add(moveDir);
+		for (let i = 0; i < this.totalBoids; i++) {
+			let neighbor = this.flock[i];
+			if (neighbor !== boid && boid.circle != undefined && neighbor.circle != undefined) {
+				try {
+					let response = {};
+					let c1 = new SAT.Circle(boid.circle.pos, boid.circle.r);
+					let c2 = new SAT.Circle(neighbor.circle.pos, neighbor.circle.r);
+					let collided = SAT.testCircleCircle(c1, c2, response);
+					if (collided) {
+						moveDir = new SAT.Vector(0, 0);
+					};
+				}
+				catch (e) { // why is this an error?
+				   // console.log(e);
+				   // moveDir = new SAT.Vector(0, 0);
+				};
+
+
+			}
+		}
+
 		return moveDir;
 	}
-	rule2(boidIndex) {
+	rule2(boid) {
 		// @return new position vector
 		// avoid getting too close to other boids
-		let boid = this.flock[boidIndex];
 		let moveDir = new SAT.Vector(0, 0);
 
 		// get distance between this and all neighbor boids
@@ -113,8 +135,9 @@ export default class Flock {
 				// console.log(`i: ${i}\tDist:${distance}`);
 				if (distance <= this.minDistance) {
 					// push back against the overlapping direction
-					moveDir = dir.normalize();
-					moveDir = moveDir.scale(this.speed); // slightly faster than normal
+					let delta = dir.normalize();
+					delta = delta.scale(this.speed); // slightly faster than normal
+					moveDir = moveDir.add(delta);
 					// console.log(`Pushing back: (${moveDir.x}, ${moveDir.y})`);
 				}
 			}

@@ -22,7 +22,6 @@ export default class Boid {
 		this.draw();
 	}
 	draw() {
-		console.log("Drawing");
 		let x = this.circle.pos.x;
 		let y = this.circle.pos.y;
 		let r = this.circle.r;
