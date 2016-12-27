@@ -1,11 +1,21 @@
-import Vector from 'Vector.js';
+/**
+ * BOID - a thing that moves like a bird
+ *
+ * @constructor
+ * @param {float} x - x position
+ * @param {float} y - y position
+ * @param {float} radius - boid circle radius
+ * @param {float} moveSpeed - speed at which boid should move
+ */
 
-export default class {
+import SAT from '../node_modules/sat/SAT.js';
+
+export default class Boid {
 	constructor(context, x, y, radius, moveSpeed) {
 		this.context = context;
 		this.x = x;
 		this.y = y;
-		this.velocity = new Vector(0, 0);
+		this.velocity = new SAT.Vector(0, 0);
 		this.radius = radius;
 		this.moveSpeed = moveSpeed;
 	}
@@ -22,12 +32,12 @@ export default class {
 	}
 	move() {
 		// update to new position
-		const currentPos = new Vector(this.x, this.y);
-		const newPos = Vector.add(currentPos, this.velocity);
+		let currentPos = new SAT.Vector(this.x, this.y);
+		let newPos = currentPos.add(this.velocity);
 		this.x = newPos.x;
 		this.y = newPos.y;
 	}
 	setVelocity(newX, newY) {
-		this.velocity = new Vector(newX, newY);
+		this.velocity = new SAT.Vector(newX, newY);
 	}
 }

@@ -1,8 +1,14 @@
-import Vector from 'Vector.js';
+/**
+ * FLOCK - a collection of moving boids
+ */
+
 import Boid from 'Boid.js';
+import Vector from 'Vector.js';
+import SAT from '../node_modules/sat/SAT.js';
+
 
 export default class Flock {
-	constructor(canvasID, totalBoids, boidRadius, boidSpeed) {
+	constructor(canvasID, totalBoids, boidRadius, boidSpeed, minDistance) {
 		this.cvs = document.getElementById(canvasID);
 		this.ctx = document.getElementById(canvasID).getContext('2d');
 		this.totalBoids = totalBoids;
@@ -10,11 +16,12 @@ export default class Flock {
 		this.canvas_width = this.cvs.width;
 		this.canvas_height = this.cvs.height;
 		this.speed = boidSpeed;
+		this.minDistance = minDistance;
 		this.flock = this.createFlock(); // array of Boid objects
-		this.center_point = new Vector(0, 0);
+		this.center_point = new SAT.Vector(0, 0);
 		window.setInterval(function() {
 			this.update();
-		}.bind(this), 60); // have to bind 'this' to interval scope
+		}.bind(this), 10); // have to bind 'this' to Flock in interval scope
 	}
 	createFlock(flock) {
 		let boids = [];
@@ -30,10 +37,10 @@ export default class Flock {
 		this.ctx.clearRect(0, 0, this.canvas_width, this.canvas_height);
 		this.center_point = this.calculateCenter();
 		this.drawCenter(this.center_point.x, this.center_point.y);
-		this.moveBoids();
 		for (let i = 0; i < this.totalBoids; i++) {
 			this.flock[i].update(this.center_point);
 		}
+		this.moveBoids();
 	}
 	calculateCenter() {
 		let averageX = 0;
@@ -44,7 +51,7 @@ export default class Flock {
 		}
 		averageX /= this.totalBoids;
 		averageY /= this.totalBoids;
-		return new Vector(averageX, averageY);
+		return new SAT.Vector(averageX, averageY);
 	}
 	drawCenter(x, y) {
 		this.ctx.beginPath();
@@ -55,46 +62,80 @@ export default class Flock {
 	}
 	moveBoids() {
 		for (let i = 0; i < this.totalBoids; i++) {
-			let currentPos = new Vector(this.flock[i].x, this.flock[i].y);
+
 			let centerOfMass = this.calculateCenter();
-			let moveDir = this.rule1(currentPos, centerOfMass);
-			currentPos = Vector.add(currentPos, moveDir);
-			moveDir = this.rule2(currentPos, i);
-			currentPos = Vector.add(currentPos, moveDir);
-			this.flock[i].x = currentPos.x;
-			this.flock[i].y = currentPos.y;
+			let currentPos = new SAT.Vector(this.flock[i].x, this.flock[i].y); // starting pos
+
+			// move toward center of mass
+			let v1 = this.rule1(currentPos, centerOfMass);
+
+			// keep minimum distance between selves
+			let v2 = this.rule2(i);
+
+			// combine both movedirs
+			let vd = v1.add(v2);
+
+			// constrain to within bounds of canvas
+			if (vd.len() > 0) {
+				// currentPos = new SAT.Vector(this.flock[i].x, this.flock[i].y); // update after rule2
+				// currentPos = currentPos.add(moveDir); // update after rule1
+				vd = this.boundsCheck(vd, currentPos);
+			}
+
+			// update boid w/ new velocity
+            this.flock[i].setVelocity(vd.x, vd.y);
 		}
 	}
 	rule1(currentPos, center) {
 		// @return new pos vector
 		// move toward center of mass of all boids
-		let moveDir = Vector.subtract(center, currentPos);
-		moveDir = Vector.normalize(moveDir);
-		moveDir = Vector.multiply(moveDir, this.speed);
+		// if doing so won't cause a collision
+		let moveDir = center.sub(currentPos);
+        moveDir = moveDir.normalize();
+		moveDir = moveDir.scale(this.speed);
 		return moveDir;
 	}
-	rule2(currentPos, boidIndex) {
+	rule2(boidIndex) {
 		// @return new position vector
 		// avoid getting too close to other boids
-		let moveDir = new Vector(0, 0);
 		let boid = this.flock[boidIndex];
+		let moveDir = new SAT.Vector(0, 0);
+
+		// get distance between this and all neighbor boids
 		for (let i = 0; i < this.totalBoids; i++) {
 			let neighbor = this.flock[i];
-			if (neighbor.x != boid.x && neighbor.y != boid.y) {
-				let neighborPos = new Vector(neighbor.x, neighbor.y);
-				let distance = Vector.distance(currentPos, neighborPos);
-				console.log(distance);
-				if (distance < this.radius * 5) {
+			if (neighbor !== boid) { // don't collide with self
+				let currentPos = new SAT.Vector(boid.x, boid.y); // may change, have to update each time
+				let neighborPos = new SAT.Vector(neighbor.x, neighbor.y);
+
+				// get vector from between 2 points
+				let dir = currentPos.sub(neighborPos);
+				let distance = dir.len();
+				// console.log(`i: ${i}\tDist:${distance}`);
+				if (distance <= this.minDistance) {
 					// push back against the overlapping direction
-					moveDir = Vector.subtract(currentPos, neighborPos);
-					moveDir = Vector.normalize(moveDir);
-					moveDir = Vector.multiply(moveDir, this.speed);
-					let newPos = Vector.add(currentPos, moveDir);
-					currentPos = newPos;
+					moveDir = dir.normalize();
+					moveDir = moveDir.scale(this.speed); // slightly faster than normal
+					// console.log(`Pushing back: (${moveDir.x}, ${moveDir.y})`);
+
+					// i = 0; // recheck !
 				}
 			}
 		}
 		return moveDir;
+	}
+	boundsCheck(moveDir, currentPos) {
+		// @return new moveDir vector that's constrained to within canvas bounds
+		let maxX = this.canvas_width + this.radius * 2;
+		let maxY = this.canvas_height + this.radius * 2;
+		let newPos = currentPos.clone();
+		newPos = newPos.add(moveDir);
+		newPos.x = newPos.x < maxX ? newPos.x : maxX;
+		newPos.x = newPos.x > 0 ? newPos.x : 0;
+		newPos.y = newPos.y < maxY ? newPos.y : maxY;
+		newPos.y = newPos.y > 0 ? newPos.y : 0;
+		let newDir = newPos.sub(currentPos);
+		return newDir;
 	}
 
 }
