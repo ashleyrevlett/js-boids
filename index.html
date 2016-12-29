@@ -3,6 +3,7 @@
 <html>
 <head>
 	<title>demo</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" />
 	<style>
 		body {
 			margin: 0;
@@ -10,19 +11,46 @@
 			background-color: #999;
 		}
 		#myCanvas {
-			background-color: #ccc;
+			background-color: #111;
 		}
 		.container {
 			margin: 50px auto;
-			width: 600px;
 		}
 	</style>
 
 </head>
 <body>
 	<div class="container">
-		<canvas id="myCanvas" width="600" height="480"></canvas>
+
+		<div class="row">
+			<div class="col-sm-12">
+				<canvas id="myCanvas" width="960" height="480"></canvas>
+			</div>
+		</div>
+
+		<div class="row">
+			<form id="boids-form" action="">
+				<div class="col-sm-3">
+					<label for="cohesion-input">Cohesion</label>
+					<input class="form-control" type="number" value="0.8" min="0" max="1" step="0.1" id="cohesion-input">
+				</div>
+				<div class="col-sm-3">
+					<label for="avoidance-input">Avoidance</label>
+					<input class="form-control" type="number" value="0.05" min="0" max="1" step="0.01" id="avoidance-input">
+				</div>
+				<div class="col-sm-3">
+					<label for="alignment-input">Alignment</label>
+					<input class="form-control" type="number" value="0.05" min="0" max="1" step="0.01" id="alignment-input">
+				</div>
+				<div class="col-sm-3">
+					<label>&nbsp;</label>
+					<input type="submit" value="Submit" class="form-control btn btn-default" />
+				</div>
+			</form>
+		</div>
+
 	</div>
+
 </body>
 
 <script src="vendor/system.js"></script>
