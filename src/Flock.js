@@ -12,22 +12,33 @@ export default class Flock {
 		this.cohesion = parseFloat(document.getElementById('cohesion').value);
 		this.avoidance = parseFloat(document.getElementById('avoidance').value);
 		this.alignment = parseFloat(document.getElementById('alignment').value);
+		this.neighborhoodSize = parseFloat(document.getElementById('neighborhood').value);
+		this.migration = parseFloat(document.getElementById('migration').value);
 		this.cvs = document.getElementById(canvasID);
 		this.ctx = document.getElementById(canvasID).getContext('2d');
 		this.totalBoids = totalBoids;
+		this.migrationTarget = new SAT.Vector(800, 300);
 		this.radius = boidRadius;
 		this.canvasWidth = this.cvs.width;
 		this.canvasHeight = this.cvs.height;
 		this.speed = boidSpeed;
 		this.minDistance = minDistance;
 		this.flock = this.createFlock(); // array of Boid objects
-		this.center_point = new SAT.Vector(0, 0);
 		window.setInterval(function() {
 			this.update();
 		}.bind(this), 10); // have to bind 'this' to Flock in interval scope
 		document.querySelectorAll('.boid-form-input').forEach(() => {
-		  addEventListener("change", (e) => { this.formUpdate(e); });
+			addEventListener("change", (e) => { this.formUpdate(e); });
 		});
+		document.getElementById('myCanvas').addEventListener('click', (e) => {
+			this.changeTarget(e);
+		}, false);
+	}
+
+	changeTarget(e) {
+		console.log("CLICKED!");
+		console.log(e);
+		this.migrationTarget = new SAT.Vector(e.x, e.y);
 	}
 
 	formUpdate(event) {
@@ -35,6 +46,8 @@ export default class Flock {
 		this.cohesion = parseFloat(document.getElementById('cohesion').value);
 		this.avoidance = parseFloat(document.getElementById('avoidance').value);
 		this.alignment = parseFloat(document.getElementById('alignment').value);
+		this.neighborhoodSize = parseFloat(document.getElementById('neighborhood').value);
+		this.migration = parseFloat(document.getElementById('migration').value);
 	}
 
 	createFlock(flock) {
@@ -50,8 +63,10 @@ export default class Flock {
 
 	update() {
 		this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-		this.center_point = this.calculateCenter();
-		this.drawCenter(this.center_point.x, this.center_point.y);
+		let center = this.calculateCenter();
+		this.drawCircle(center.x, center.y, '#ffff00', 20);
+		this.drawCircle(this.migrationTarget.x, this.migrationTarget.y, '#ee00aa', 10);
+
 		for (let i = 0; i < this.totalBoids; i++) {
 			this.flock[i].update();
 		}
@@ -84,10 +99,10 @@ export default class Flock {
 		return new SAT.Vector(averageX, averageY);
 	}
 
-	drawCenter(x, y) {
+	drawCircle(x, y, color, size) {
 		this.ctx.beginPath();
-		this.ctx.arc(x, y, 20, 0, Math.PI * 2);
-		this.ctx.fillStyle = '#ffff00';
+		this.ctx.arc(x, y, size, 0, Math.PI * 2);
+		this.ctx.fillStyle = color;
 		this.ctx.fill();
 		this.ctx.closePath();
 	}
@@ -95,23 +110,27 @@ export default class Flock {
 	moveBoids() {
 		for (let i = 0; i < this.totalBoids; i++) {
 
-			let centerOfMass = this.calculateCenter();
-			// console.log(averageVelocity);
-
 			let currentPos = new SAT.Vector(this.flock[i].circle.pos.x, this.flock[i].circle.pos.y); // starting pos
 			let boid = this.flock[i];
 
+			// get distance between this and all neighbor boids
+			let neighbors = this.getNeighbors(boid, this.neighborhoodSize);
+
 			// move toward center of mass
-			let v1 = this.rule1(centerOfMass, boid);
+			let v1 = this.rule1(boid, neighbors);
 
 			// keep minimum distance between selves
-			let v2 = this.rule2(boid);
+			let v2 = this.rule2(boid, neighbors);
 
 			// tend toward average velocity of flock
-			let v3 = this.rule3(boid);
+			let v3 = this.rule3(boid, neighbors);
+
+			// move toward migration destination target
+			let v4 = this.rule4(boid);
+			// console.log(v4);
 
 			// combine both movedirs
-			let vd = v1.add(v2).add(v3);
+			let vd = v1.add(v2).add(v3).add(v4);
 
 			// constrain to within bounds of canvas
 			if (vd.len() > 0) {
@@ -123,23 +142,23 @@ export default class Flock {
 		}
 	}
 
-	rule1(center, boid) {
+	rule1(boid, neighbors) {
 		// @return new pos vector
 		// move toward center of mass of all boids
+		let centerOfMass = this.calculateCenter(neighbors);
 		let currentPos = boid.circle.pos;
-		let moveDir = center.sub(currentPos);
-		moveDir = moveDir.scale(this.cohesion);
+		let moveDir = centerOfMass.sub(currentPos);
+		moveDir = moveDir.normalize().scale(this.cohesion);
 		return moveDir;
 	}
 
-	rule2(boid) {
+	rule2(boid, neighbors) {
 		// @return new position vector
 		// avoid getting too close to other boids
 		let moveDir = new SAT.Vector(0, 0);
 
-		// get distance between this and all neighbor boids
-		for (let i = 0; i < this.totalBoids; i++) {
-			let neighbor = this.flock[i];
+		for (let i = 0; i < neighbors.length; i++) {
+			let neighbor = neighbors[i];
 			if (neighbor !== boid) { // don't collide with self
 				let currentPos = new SAT.Vector(boid.circle.pos.x, boid.circle.pos.y); // may change, have to update each time
 				let neighborPos = new SAT.Vector(neighbor.circle.pos.x, neighbor.circle.pos.y);
@@ -160,11 +179,20 @@ export default class Flock {
 		return moveDir;
 	}
 
-	rule3(boid) {
-		let neighbors = this.getNeighbors(boid, 80);
+	rule3(boid, neighbors) {
+		// try to match the volocity of neighboring boids
 		let averageVelocity = this.calculateVelocity(neighbors);
 		averageVelocity = averageVelocity.scale(this.alignment);
 		return averageVelocity;
+	}
+
+	rule4(boid) {
+		// steer toward migration target
+		// set temp target
+		let targetPos = this.migrationTarget.clone();
+		let moveDir = targetPos.sub(boid.circle.pos);
+		moveDir = moveDir.normalize().scale(this.migration);
+		return moveDir;
 	}
 
 	boundsCheck(moveDir, currentPos) {

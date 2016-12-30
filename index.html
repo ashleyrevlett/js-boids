@@ -30,17 +30,25 @@
 
 		<div class="row">
 			<form id="boids-form" action="">
-				<div class="col-sm-4">
+				<div class="col-sm-2">
 					<label for="cohesion-input">Cohesion</label>
-					<input class="form-control boid-form-input" type="number" value="0.01" min="0" max="1" step="0.1" id="cohesion">
+					<input class="form-control boid-form-input" type="number" value="0.001" min="0" max="1" step="0.001" id="cohesion">
 				</div>
-				<div class="col-sm-4">
+				<div class="col-sm-2">
 					<label for="avoidance-input">Avoidance</label>
-					<input class="form-control boid-form-input" type="number" value="0.6" min="0" max="1" step="0.1" id="avoidance">
+					<input class="form-control boid-form-input" type="number" value="0.99" min="0" max="1" step="0.01" id="avoidance">
 				</div>
-				<div class="col-sm-4">
+				<div class="col-sm-2">
 					<label for="alignment-input">Alignment</label>
-					<input class="form-control boid-form-input" type="number" value="0.25" min="0" max="1" step="0.01" id="alignment">
+					<input class="form-control boid-form-input" type="number" value="0.50" min="0" max="1" step="0.01" id="alignment">
+				</div>
+				<div class="col-sm-2">
+					<label for="alignment-input">Migration</label>
+					<input class="form-control boid-form-input" type="number" value=".9" min="0" max="100" step="0.1" id="migration">
+				</div>
+				<div class="col-sm-2">
+					<label for="alignment-input">Neighborhood</label>
+					<input class="form-control boid-form-input" type="number" value="20" min="0" max="100" step="1" id="neighborhood">
 				</div>
 			</form>
 		</div>
