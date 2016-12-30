@@ -30,24 +30,21 @@
 
 		<div class="row">
 			<form id="boids-form" action="">
-				<div class="col-sm-3">
+				<div class="col-sm-4">
 					<label for="cohesion-input">Cohesion</label>
-					<input class="form-control" type="number" value="0.8" min="0" max="1" step="0.1" id="cohesion-input">
+					<input class="form-control boid-form-input" type="number" value="0.01" min="0" max="1" step="0.1" id="cohesion">
 				</div>
-				<div class="col-sm-3">
+				<div class="col-sm-4">
 					<label for="avoidance-input">Avoidance</label>
-					<input class="form-control" type="number" value="0.05" min="0" max="1" step="0.01" id="avoidance-input">
+					<input class="form-control boid-form-input" type="number" value="0.6" min="0" max="1" step="0.1" id="avoidance">
 				</div>
-				<div class="col-sm-3">
+				<div class="col-sm-4">
 					<label for="alignment-input">Alignment</label>
-					<input class="form-control" type="number" value="0.05" min="0" max="1" step="0.01" id="alignment-input">
-				</div>
-				<div class="col-sm-3">
-					<label>&nbsp;</label>
-					<input type="submit" value="Submit" class="form-control btn btn-default" />
+					<input class="form-control boid-form-input" type="number" value="0.25" min="0" max="1" step="0.01" id="alignment">
 				</div>
 			</form>
 		</div>
+
 
 	</div>
 

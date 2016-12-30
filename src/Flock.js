@@ -9,12 +9,15 @@ import SAT from '../node_modules/sat/SAT.js';
 
 export default class Flock {
 	constructor(canvasID, totalBoids, boidRadius, boidSpeed, minDistance) {
+		this.cohesion = parseFloat(document.getElementById('cohesion').value);
+		this.avoidance = parseFloat(document.getElementById('avoidance').value);
+		this.alignment = parseFloat(document.getElementById('alignment').value);
 		this.cvs = document.getElementById(canvasID);
 		this.ctx = document.getElementById(canvasID).getContext('2d');
 		this.totalBoids = totalBoids;
 		this.radius = boidRadius;
-		this.canvas_width = this.cvs.width;
-		this.canvas_height = this.cvs.height;
+		this.canvasWidth = this.cvs.width;
+		this.canvasHeight = this.cvs.height;
 		this.speed = boidSpeed;
 		this.minDistance = minDistance;
 		this.flock = this.createFlock(); // array of Boid objects
@@ -22,13 +25,23 @@ export default class Flock {
 		window.setInterval(function() {
 			this.update();
 		}.bind(this), 10); // have to bind 'this' to Flock in interval scope
+		document.querySelectorAll('.boid-form-input').forEach(() => {
+		  addEventListener("change", (e) => { this.formUpdate(e); });
+		});
+	}
+
+	formUpdate(event) {
+		// anytime an input parameter changes, update our stored copy
+		this.cohesion = parseFloat(document.getElementById('cohesion').value);
+		this.avoidance = parseFloat(document.getElementById('avoidance').value);
+		this.alignment = parseFloat(document.getElementById('alignment').value);
 	}
 
 	createFlock(flock) {
 		let boids = [];
 		for (let i = 0; i < this.totalBoids; i++) {
-			let randomX = Math.floor((Math.random() * this.canvas_width) + 1);
-			let randomY = Math.floor((Math.random() * this.canvas_height) + 1);
+			let randomX = Math.floor((Math.random() * this.canvasWidth) + 1);
+			let randomY = Math.floor((Math.random() * this.canvasHeight) + 1);
 			let b = new Boid(this.ctx, randomX, randomY, this.radius, this.speed);
 			boids.push(b);
 		}
@@ -36,7 +49,7 @@ export default class Flock {
 	}
 
 	update() {
-		this.ctx.clearRect(0, 0, this.canvas_width, this.canvas_height);
+		this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 		this.center_point = this.calculateCenter();
 		this.drawCenter(this.center_point.x, this.center_point.y);
 		for (let i = 0; i < this.totalBoids; i++) {
@@ -115,7 +128,7 @@ export default class Flock {
 		// move toward center of mass of all boids
 		let currentPos = boid.circle.pos;
 		let moveDir = center.sub(currentPos);
-		moveDir = moveDir.scale(0.003);
+		moveDir = moveDir.scale(this.cohesion);
 		return moveDir;
 	}
 
@@ -138,7 +151,7 @@ export default class Flock {
 				if (distance <= this.minDistance) {
 					// push back against the overlapping direction
 					let delta = dir.normalize();
-					delta = delta.scale(this.speed); // slightly faster than normal
+					delta = delta.scale(this.avoidance); // slightly faster than normal
 					moveDir = moveDir.add(delta);
 					// console.log(`Pushing back: (${moveDir.x}, ${moveDir.y})`);
 				}
@@ -150,14 +163,14 @@ export default class Flock {
 	rule3(boid) {
 		let neighbors = this.getNeighbors(boid, 80);
 		let averageVelocity = this.calculateVelocity(neighbors);
-		averageVelocity = averageVelocity.scale(0.08);
+		averageVelocity = averageVelocity.scale(this.alignment);
 		return averageVelocity;
 	}
 
 	boundsCheck(moveDir, currentPos) {
 		// @return new moveDir vector that's constrained to within canvas bounds
-		let maxX = this.canvas_width + this.radius * 2;
-		let maxY = this.canvas_height + this.radius * 2;
+		let maxX = this.canvasWidth + this.radius * 2;
+		let maxY = this.canvasHeight + this.radius * 2;
 		let newPos = currentPos.clone();
 		newPos = newPos.add(moveDir);
 		newPos.x = newPos.x < maxX ? newPos.x : maxX;
