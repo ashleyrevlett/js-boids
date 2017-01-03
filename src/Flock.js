@@ -27,7 +27,9 @@ export default class Flock {
 			this.update();
 		}.bind(this), 10); // have to bind 'this' to Flock in interval scope
 		document.querySelectorAll('.boid-form-input').forEach(() => {
-			addEventListener("change", (e) => { this.formUpdate(e); });
+			addEventListener('change', (e) => {
+				this.formUpdate(e);
+			});
 		});
 		document.getElementById('myCanvas').addEventListener('click', (e) => {
 			this.changeTarget(e);
@@ -36,8 +38,6 @@ export default class Flock {
 
 	changeTarget(e) {
 		// set new migration target to mouse click location
-		console.log("CLICKED!");
-		console.log(e);
 		this.migrationTarget = new SAT.Vector(e.x, e.y);
 	}
 
@@ -120,7 +120,6 @@ export default class Flock {
 	moveBoids() {
 		// loop through each member of flock, updating velocity based on all rules
 		for (let i = 0; i < this.totalBoids; i++) {
-
 			let currentPos = new SAT.Vector(this.flock[i].circle.pos.x, this.flock[i].circle.pos.y); // starting pos
 			let boid = this.flock[i];
 

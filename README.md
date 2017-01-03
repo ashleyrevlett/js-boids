@@ -17,5 +17,8 @@ Algorithm reference: http://www.kfish.org/boids/pseudocode.html
 - NPM scripts are used to invoke Babel and serve static files 
 - ESLint is used w/ google preset 
 
- 
+###Build
+```yarn install``` 
+```npm run build``` 
+```npm run serve``` 
 
