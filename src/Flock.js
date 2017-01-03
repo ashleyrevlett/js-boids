@@ -3,7 +3,6 @@
  */
 
 import Boid from 'Boid.js';
-import Vector from 'Vector.js';
 import SAT from '../node_modules/sat/SAT.js';
 
 
@@ -36,6 +35,7 @@ export default class Flock {
 	}
 
 	changeTarget(e) {
+		// set new migration target to mouse click location
 		console.log("CLICKED!");
 		console.log(e);
 		this.migrationTarget = new SAT.Vector(e.x, e.y);
@@ -51,6 +51,7 @@ export default class Flock {
 	}
 
 	createFlock(flock) {
+		// on page load, create the boids with random initial positions
 		let boids = [];
 		for (let i = 0; i < this.totalBoids; i++) {
 			let randomX = Math.floor((Math.random() * this.canvasWidth) + 1);
@@ -62,30 +63,38 @@ export default class Flock {
 	}
 
 	update() {
+		// called every 10 ms
+
+		// clear the screen
 		this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-		let center = this.calculateCenter();
-		this.drawCircle(center.x, center.y, '#ffff00', 20);
+
+		// draw the migration target
 		this.drawCircle(this.migrationTarget.x, this.migrationTarget.y, '#ee00aa', 10);
 
+		// move the boids
+		this.moveBoids(); // move after 1st draw
+
+		// apply velocity and draw each boid
 		for (let i = 0; i < this.totalBoids; i++) {
 			this.flock[i].update();
 		}
-		this.moveBoids(); // move after 1st draw
 	}
 
-	calculateCenter() {
+	calculateCenter(boids) {
+		// @return center point of mass of boids
 		let averageX = 0;
 		let averageY = 0;
-		for (let i = 0; i < this.totalBoids; i++) {
-			averageX += this.flock[i].circle.pos.x;
-			averageY += this.flock[i].circle.pos.y;
+		for (let i = 0; i < boids.length; i++) {
+			averageX += boids[i].circle.pos.x;
+			averageY += boids[i].circle.pos.y;
 		}
-		averageX /= this.totalBoids;
-		averageY /= this.totalBoids;
+		averageX /= boids.length;
+		averageY /= boids.length;
 		return new SAT.Vector(averageX, averageY);
 	}
 
 	calculateVelocity(boids) {
+		// @return average velocity vector of boids
 		let averageX = 0;
 		let averageY = 0;
 		if (boids.length > 0) {
@@ -100,6 +109,7 @@ export default class Flock {
 	}
 
 	drawCircle(x, y, color, size) {
+		// draw a circle at a given position, color and size
 		this.ctx.beginPath();
 		this.ctx.arc(x, y, size, 0, Math.PI * 2);
 		this.ctx.fillStyle = color;
@@ -108,6 +118,7 @@ export default class Flock {
 	}
 
 	moveBoids() {
+		// loop through each member of flock, updating velocity based on all rules
 		for (let i = 0; i < this.totalBoids; i++) {
 
 			let currentPos = new SAT.Vector(this.flock[i].circle.pos.x, this.flock[i].circle.pos.y); // starting pos
@@ -143,7 +154,7 @@ export default class Flock {
 	}
 
 	rule1(boid, neighbors) {
-		// @return new pos vector
+		// @return movement velocity vector
 		// move toward center of mass of all boids
 		let centerOfMass = this.calculateCenter(neighbors);
 		let currentPos = boid.circle.pos;
@@ -153,7 +164,7 @@ export default class Flock {
 	}
 
 	rule2(boid, neighbors) {
-		// @return new position vector
+		// @return movement velocity vector
 		// avoid getting too close to other boids
 		let moveDir = new SAT.Vector(0, 0);
 
@@ -180,6 +191,7 @@ export default class Flock {
 	}
 
 	rule3(boid, neighbors) {
+		// @return movement velocity vector
 		// try to match the volocity of neighboring boids
 		let averageVelocity = this.calculateVelocity(neighbors);
 		averageVelocity = averageVelocity.scale(this.alignment);
@@ -187,8 +199,8 @@ export default class Flock {
 	}
 
 	rule4(boid) {
+		// @return movement velocity vector
 		// steer toward migration target
-		// set temp target
 		let targetPos = this.migrationTarget.clone();
 		let moveDir = targetPos.sub(boid.circle.pos);
 		moveDir = moveDir.normalize().scale(this.migration);
@@ -210,6 +222,7 @@ export default class Flock {
 	}
 
 	getNeighbors(boid, maxDistance) {
+		// @return array of boids within a given distance of a boid
 		let nearby = [];
 		for (let i = 0; i < this.totalBoids; i++) {
 			let neighbor = this.flock[i];

@@ -1,23 +1,28 @@
 <!doctype html>
-<!DOCTYPE HTML>
-<html>
+<html class="no-js" lang="en-us">
 <head>
-	<title>demo</title>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" />
+    <meta charset="utf-8">
+	<title>js-boids demo</title>
+	<link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
 	<style>
 		body {
 			margin: 0;
 			padding: 0;
-			background-color: #999;
+			background-color: #222;
+			color: #eee;
+			font-size: 1.2em;
 		}
 		#myCanvas {
 			background-color: #111;
+		}
+		#boids-form {
+			margin-top: 2em;
+			margin-bottom: 2em;
 		}
 		.container {
 			margin: 50px auto;
 		}
 	</style>
-
 </head>
 <body>
 	<div class="container">
@@ -28,41 +33,39 @@
 			</div>
 		</div>
 
+		<form id="boids-form" action="" class="row">
+			<div class="col-sm-2">
+				<label for="cohesion-input">Cohesion</label>
+				<input class="form-control boid-form-input" type="number" value="0.001" min="0" max="1" step="0.001" id="cohesion">
+			</div>
+			<div class="col-sm-2">
+				<label for="avoidance-input">Avoidance</label>
+				<input class="form-control boid-form-input" type="number" value="0.99" min="0" max="1" step="0.01" id="avoidance">
+			</div>
+			<div class="col-sm-2">
+				<label for="alignment-input">Alignment</label>
+				<input class="form-control boid-form-input" type="number" value="0.50" min="0" max="1" step="0.01" id="alignment">
+			</div>
+			<div class="col-sm-2">
+				<label for="alignment-input">Migration</label>
+				<input class="form-control boid-form-input" type="number" value=".9" min="0" max="100" step="0.1" id="migration">
+			</div>
+			<div class="col-sm-2">
+				<label for="alignment-input">Neighborhood Size</label>
+				<input class="form-control boid-form-input" type="number" value="20" min="0" max="100" step="1" id="neighborhood">
+			</div>
+		</form>
 		<div class="row">
-			<form id="boids-form" action="">
-				<div class="col-sm-2">
-					<label for="cohesion-input">Cohesion</label>
-					<input class="form-control boid-form-input" type="number" value="0.001" min="0" max="1" step="0.001" id="cohesion">
-				</div>
-				<div class="col-sm-2">
-					<label for="avoidance-input">Avoidance</label>
-					<input class="form-control boid-form-input" type="number" value="0.99" min="0" max="1" step="0.01" id="avoidance">
-				</div>
-				<div class="col-sm-2">
-					<label for="alignment-input">Alignment</label>
-					<input class="form-control boid-form-input" type="number" value="0.50" min="0" max="1" step="0.01" id="alignment">
-				</div>
-				<div class="col-sm-2">
-					<label for="alignment-input">Migration</label>
-					<input class="form-control boid-form-input" type="number" value=".9" min="0" max="100" step="0.1" id="migration">
-				</div>
-				<div class="col-sm-2">
-					<label for="alignment-input">Neighborhood</label>
-					<input class="form-control boid-form-input" type="number" value="20" min="0" max="100" step="1" id="neighborhood">
-				</div>
-			</form>
+			<p class="col-sm-12">Click anywhere to make the boids migrate toward a target.</p>
 		</div>
-
 
 	</div>
 
+	<script src="node_modules/systemjs/dist/system.js"></script>
+	<script>
+	    System.config({ "baseURL": "lib" }); // babel export folder
+	    System.import("main.js"); // app entry point
+	 </script>
+
 </body>
-
-<script src="vendor/system.js"></script>
-<script>
-    System.config({ "baseURL": "lib" }); // babel export folder
-    System.import("main.js"); // app entry point
- </script>
-
-
 </html>
